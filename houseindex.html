@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>House Price Prediction</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #777;
+            font-size: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .predict-btn {
+            width: 100%;
+            margin-top: 30px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #667eea;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .predict-btn:hover {
+            background: #5568d9;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f5f7ff;
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+        }
+
+        .result h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 30px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .error {
+            margin-top: 20px;
+            padding: 15px;
+            background: #ffe5e5;
+            color: #d00;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        @media (max-width: 650px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🏠 House Price Prediction</h1>
+        <p>Enter house details to predict the selling price</p>
+    </div>
+
+    <form id="predictionForm">
+
+        <div class="form-grid">
+
+            <div class="input-group">
+                <label for="Id">House ID</label>
+                <input
+                    type="number"
+                    id="Id"
+                    value="100"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="OverallQual">Overall Quality</label>
+                <input
+                    type="number"
+                    id="OverallQual"
+                    min="1"
+                    max="10"
+                    value="7"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="GrLivArea">Living Area (sq ft)</label>
+                <input
+                    type="number"
+                    id="GrLivArea"
+                    value="1710"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="GarageCars">Garage Cars</label>
+                <input
+                    type="number"
+                    step="0.1"
+                    id="GarageCars"
+                    value="2"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="TotalBsmtSF">Basement Area (sq ft)</label>
+                <input
+                    type="number"
+                    step="0.1"
+                    id="TotalBsmtSF"
+                    value="856"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="YearBuilt">Year Built</label>
+                <input
+                    type="number"
+                    id="YearBuilt"
+                    value="2005"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="FullBath">Full Bathrooms</label>
+                <input
+                    type="number"
+                    id="FullBath"
+                    value="2"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="BedroomAbvGr">Bedrooms Above Ground</label>
+                <input
+                    type="number"
+                    id="BedroomAbvGr"
+                    value="3"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="LotArea">Lot Area (sq ft)</label>
+                <input
+                    type="number"
+                    step="0.1"
+                    id="LotArea"
+                    value="8450"
+                    required
+                >
+            </div>
+
+        </div>
+
+        <button type="submit" class="predict-btn">
+            🔮 Predict House Price
+        </button>
+
+    </form>
+
+    <div class="loading" id="loading">
+        ⏳ Predicting house price...
+    </div>
+
+    <div class="result" id="result">
+
+        <h2>Predicted Sale Price</h2>
+
+        <div class="price" id="price">
+            ₹0
+        </div>
+
+    </div>
+
+    <div class="error" id="error">
+        ❌ Unable to get prediction. Please check whether FastAPI is running.
+    </div>
+
+</div>
+
+
+<script>
+
+    const form = document.getElementById("predictionForm");
+
+    const result = document.getElementById("result");
+
+    const price = document.getElementById("price");
+
+    const error = document.getElementById("error");
+
+    const loading = document.getElementById("loading");
+
+
+    form.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        result.style.display = "none";
+
+        error.style.display = "none";
+
+        loading.style.display = "block";
+
+
+        // Collect input values
+
+        const data = {
+
+            Id: parseInt(document.getElementById("Id").value),
+
+            OverallQual: parseInt(
+                document.getElementById("OverallQual").value
+            ),
+
+            GrLivArea: parseFloat(
+                document.getElementById("GrLivArea").value
+            ),
+
+            GarageCars: parseFloat(
+                document.getElementById("GarageCars").value
+            ),
+
+            TotalBsmtSF: parseFloat(
+                document.getElementById("TotalBsmtSF").value
+            ),
+
+            YearBuilt: parseInt(
+                document.getElementById("YearBuilt").value
+            ),
+
+            FullBath: parseInt(
+                document.getElementById("FullBath").value
+            ),
+
+            BedroomAbvGr: parseInt(
+                document.getElementById("BedroomAbvGr").value
+            ),
+
+            LotArea: parseFloat(
+                document.getElementById("LotArea").value
+            )
+        };
+
+
+        try {
+
+            const response = await fetch(
+                "http://127.0.0.1:8000/predict",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(data)
+                }
+            );
+
+
+            if (!response.ok) {
+                throw new Error("API request failed");
+            }
+
+
+            const resultData = await response.json();
+
+
+            loading.style.display = "none";
+
+            result.style.display = "block";
+
+
+            const predictedPrice =
+                resultData.predicted_SalePrice;
+
+
+            price.innerHTML =
+                "$" +
+                Number(predictedPrice).toLocaleString(
+                    "en-US",
+                    {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }
+                );
+
+        }
+
+        catch (err) {
+
+            console.error(err);
+
+            loading.style.display = "none";
+
+            error.style.display = "block";
+
+        }
+
+    });
+
+</script>
+
+</body>
+</html>
